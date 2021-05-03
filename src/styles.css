@@ -1,0 +1,15 @@
+body .ck.ck-editor {
+	width: 100%;
+	resize: none;
+}
+.ck.ck-editor__editable_inline > :first-child {
+	display: none;
+}
+
+img {
+	width: 100%;
+}
+
+code {
+	white-space: break-spaces !important;
+}
