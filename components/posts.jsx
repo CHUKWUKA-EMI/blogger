@@ -95,114 +95,127 @@ export default function Posts() {
 			<Grid justify="center" spacing={3} container>
 				<Grid sm={3} item></Grid>
 				<Grid xs={12} sm={6} item>
-					{!loading
-						? posts.length > 0
-							? posts.map((post) => (
-									<Box style={{ marginTop: "2em" }} key={post.id}>
-										<Box key={post.id}>
+					{!loading ? (
+						posts.length > 0 ? (
+							posts.map((post) => (
+								<Box style={{ marginTop: "2em" }} key={post.id}>
+									<Box key={post.id}>
+										<Box
+											style={{
+												display: "flex",
+												alignItems: "center",
+											}}>
+											<Box
+												style={{
+													borderRadius: "50%",
+													height: "4em",
+													width: "4em",
+													backgroundColor: "#32506D",
+													color: "white",
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "center",
+													marginRight: "1em",
+												}}>
+												{post.user ? (
+													post.user.imageUrl != null ? (
+														<Avatar
+															style={{ width: "100%", height: "100%" }}
+															src={post.user.imageUrl}
+														/>
+													) : (
+														<Typography
+															style={{
+																fontWeight: "bold",
+															}}>{`${post.user.firstName[0].toUpperCase()} ${post.user.lastName[0].toUpperCase()}`}</Typography>
+													)
+												) : (
+													<Typography style={{ fontWeight: "bold" }}>
+														UU
+													</Typography>
+												)}
+											</Box>
+
 											<Box
 												style={{
 													display: "flex",
-													alignItems: "center",
+													flexDirection: "column",
 												}}>
-												<Box
-													style={{
-														borderRadius: "50%",
-														height: "4em",
-														width: "4em",
-														backgroundColor: "#32506D",
-														color: "white",
-														display: "flex",
-														alignItems: "center",
-														justifyContent: "center",
-														marginRight: "1em",
-													}}>
-													{post.user ? (
-														post.user.imageUrl != null ? (
-															<Avatar
-																style={{ width: "100%", height: "100%" }}
-																src={post.user.imageUrl}
-															/>
-														) : (
-															<Typography
-																style={{
-																	fontWeight: "bold",
-																}}>{`${post.user.firstName[0].toUpperCase()} ${post.user.lastName[0].toUpperCase()}`}</Typography>
-														)
-													) : (
-														<Typography style={{ fontWeight: "bold" }}>
-															UU
-														</Typography>
-													)}
-												</Box>
-
-												<Box
-													style={{
-														display: "flex",
-														flexDirection: "column",
-													}}>
-													{post.user ? (
-														<Typography
-															variant="h6"
-															style={{
-																fontWeight: "bold",
-															}}>{`${post.user.firstName} ${post.user.lastName}`}</Typography>
-													) : (
-														<Typography
-															variant="h6"
-															style={{
-																fontWeight: "bold",
-															}}>
-															Anonymous
-														</Typography>
-													)}
-												</Box>
+												{post.user ? (
+													<Typography
+														variant="h6"
+														style={{
+															fontWeight: "bold",
+														}}>{`${post.user.firstName} ${post.user.lastName}`}</Typography>
+												) : (
+													<Typography
+														variant="h6"
+														style={{
+															fontWeight: "bold",
+														}}>
+														Anonymous
+													</Typography>
+												)}
 											</Box>
 										</Box>
-										<Box style={{ marginTop: "1.5em" }}>
-											<Typography
-												style={{
-													fontWeight: 900,
-													fontSize: "2em",
-												}}
-												variant="body2">
-												<Link href={`post/${post.slug}`}>
-													<a className={classes.link}>{post.title}</a>
-												</Link>
-											</Typography>
-											<Typography
-												style={{ fontWeight: 600, color: "#19857b" }}
-												variant="body1">
-												{moment(post.createdAt).format("MMM DD, YYYY")} {`. `}
-												{readTime(post.content).text}
-											</Typography>
-										</Box>
-										<Divider variant="fullWidth" />
 									</Box>
-							  ))
-							: "No data"
-						: [0, 1].map((_, i) => (
-								<div
-									style={{
-										width: "60%",
-										marginLeft: "auto",
-										marginRight: "auto",
-									}}>
-									<Skeleton variant="text" animation="wave" />
-									<Skeleton
-										variant="circle"
-										width={40}
-										height={40}
-										animation="wave"
-									/>
-									<Skeleton
-										variant="rect"
-										width={`${100}%`}
-										height={118}
-										animation="wave"
-									/>
-								</div>
-						  ))}
+									<Box style={{ marginTop: "1.5em" }}>
+										<Typography
+											style={{
+												fontWeight: 900,
+												fontSize: "2em",
+											}}
+											variant="body2">
+											<Link href={`post/${post.slug}`}>
+												<a className={classes.link}>{post.title}</a>
+											</Link>
+										</Typography>
+										<Typography
+											style={{ fontWeight: 600, color: "#19857b" }}
+											variant="body1">
+											{moment(post.createdAt).format("MMM DD, YYYY")} {`. `}
+											{readTime(post.content).text}
+										</Typography>
+									</Box>
+									<Divider variant="fullWidth" />
+								</Box>
+							))
+						) : (
+							<img
+								style={{
+									width: "50%",
+									marginLeft: "auto",
+									marginRight: "auto",
+									marginTop: "1em",
+								}}
+								src="/publish_post.svg"
+								alt="blog image"
+							/>
+						)
+					) : (
+						[0, 1].map((_, i) => (
+							<div
+								style={{
+									width: "60%",
+									marginLeft: "auto",
+									marginRight: "auto",
+								}}>
+								<Skeleton variant="text" animation="wave" />
+								<Skeleton
+									variant="circle"
+									width={40}
+									height={40}
+									animation="wave"
+								/>
+								<Skeleton
+									variant="rect"
+									width={`${100}%`}
+									height={118}
+									animation="wave"
+								/>
+							</div>
+						))
+					)}
 				</Grid>
 				<Grid sm={3} item>
 					<Typography
