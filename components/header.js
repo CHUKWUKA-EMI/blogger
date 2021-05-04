@@ -14,7 +14,13 @@ import MenuIcon from "@material-ui/icons/Menu";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Reorder, PostAdd, ViewStream, Person } from "@material-ui/icons";
+import {
+	Reorder,
+	PostAdd,
+	ViewStream,
+	Person,
+	FiberManualRecord,
+} from "@material-ui/icons";
 import { useRouter } from "next/router";
 
 const drawerWidth = 15;
@@ -87,7 +93,7 @@ function Header(props) {
 	const navLinks = [
 		{
 			name: "Blogs",
-			href: "/blogs",
+			href: "/posts",
 			icon: <Reorder style={{ color: "#32506D" }} />,
 		},
 		{
@@ -95,11 +101,11 @@ function Header(props) {
 			href: "/write",
 			icon: <PostAdd style={{ color: "#32506D" }} />,
 		},
-		{
-			name: "My Activities",
-			href: "/activities",
-			icon: <ViewStream style={{ color: "#32506D" }} />,
-		},
+		// {
+		// 	name: "My Activities",
+		// 	href: "/activities",
+		// 	icon: <ViewStream style={{ color: "#32506D" }} />,
+		// },
 		{
 			name: "Login",
 			href: "/login",
@@ -150,10 +156,18 @@ function Header(props) {
 							paddingRight: "3em",
 						}}>
 						<Typography
-							style={{ color: "rgba(0,0,0,0.6)", fontWeight: 900 }}
+							style={{
+								backgroundColor: "#32506D",
+								fontWeight: 900,
+								display: "flex",
+								alignItems: "center",
+								height: "2em",
+							}}
 							variant="h6"
 							noWrap>
-							Writers Community
+							<FiberManualRecord style={{ color: "white" }} />
+							<FiberManualRecord style={{ color: "white" }} />
+							<FiberManualRecord style={{ color: "white" }} />
 						</Typography>
 						<div style={{ display: "flex", alignItems: "center" }}>
 							<Hidden xsDown>

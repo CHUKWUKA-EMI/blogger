@@ -218,84 +218,88 @@ export default function Posts() {
 							padding: "0.5em",
 						}}>
 						{users.length > 0
-							? users.map((user) => (
-									<Box
-										style={{
-											backgroundColor: "white",
-											padding: "4px",
-											borderRadius: "10px",
-										}}
-										key={user.id}>
+							? users.map((user) => {
+									return user.posts.length > 0 ? (
 										<Box
 											style={{
-												display: "flex",
-												alignItems: "center",
-											}}>
+												backgroundColor: "white",
+												padding: "4px",
+												borderRadius: "10px",
+											}}
+											key={user.id}>
 											<Box
 												style={{
-													borderRadius: "50%",
-													height: "4em",
-													width: "4em",
-													backgroundColor: "#32506D",
-													color: "white",
 													display: "flex",
 													alignItems: "center",
-													justifyContent: "center",
-													marginRight: "1em",
 												}}>
-												{user.imageUrl != null ? (
-													<Avatar
-														style={{ width: "100%", height: "100%" }}
-														src={user.imageUrl}
-													/>
-												) : (
+												<Box
+													style={{
+														borderRadius: "50%",
+														height: "4em",
+														width: "4em",
+														backgroundColor: "#32506D",
+														color: "white",
+														display: "flex",
+														alignItems: "center",
+														justifyContent: "center",
+														marginRight: "1em",
+													}}>
+													{user.imageUrl != null ? (
+														<Avatar
+															style={{ width: "100%", height: "100%" }}
+															src={user.imageUrl}
+														/>
+													) : (
+														<Typography
+															style={{
+																fontWeight: "bold",
+															}}>{`${user.firstName[0].toUpperCase()} ${user.lastName[0].toUpperCase()}`}</Typography>
+													)}
+												</Box>
+
+												<Box
+													style={{
+														display: "flex",
+														flexDirection: "column",
+													}}>
 													<Typography
+														variant="h6"
 														style={{
 															fontWeight: "bold",
-														}}>{`${user.firstName[0].toUpperCase()} ${user.lastName[0].toUpperCase()}`}</Typography>
-												)}
+														}}>{`${user.firstName} ${user.lastName}`}</Typography>
+													<Typography
+														style={{ color: "slategrey" }}
+														variant="body1">
+														{user.email}
+													</Typography>
+												</Box>
 											</Box>
-
 											<Box
 												style={{
-													display: "flex",
-													flexDirection: "column",
+													width: "100%",
+													textAlign: "center",
+													marginTop: "1em",
 												}}>
 												<Typography
-													variant="h6"
-													style={{
-														fontWeight: "bold",
-													}}>{`${user.firstName} ${user.lastName}`}</Typography>
-												<Typography
-													style={{ color: "slategrey" }}
+													style={{ color: "black", fontWeight: "bold" }}
 													variant="body1">
-													{user.email}
+													Published {user.posts.length} posts
 												</Typography>
+												<Button
+													className={classes.follow}
+													startIcon={
+														<AddIcon
+															style={{ fontSize: "1.5em", color: "white" }}
+														/>
+													}>
+													Follow
+												</Button>
 											</Box>
 										</Box>
-										<Box
-											style={{
-												width: "100%",
-												textAlign: "center",
-												marginTop: "1em",
-											}}>
-											<Typography
-												style={{ color: "black", fontWeight: "bold" }}
-												variant="body1">
-												Published {user.posts.length} posts
-											</Typography>
-											<Button
-												className={classes.follow}
-												startIcon={
-													<AddIcon
-														style={{ fontSize: "1.5em", color: "white" }}
-													/>
-												}>
-												Follow
-											</Button>
-										</Box>
-									</Box>
-							  ))
+									) : (
+										""
+									);
+							  })
 							: ""}
 					</Box>
 				</Grid>
