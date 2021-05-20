@@ -8,9 +8,14 @@ import CloseIcon from "@material-ui/icons/Close";
 import Skeleton from "@material-ui/lab/Skeleton";
 import Snackbar from "@material-ui/core/Snackbar";
 import { makeStyles } from "@material-ui/core/styles";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import ClearIcon from "@material-ui/icons/Clear";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+import MarkdownIt from "markdown-it";
+import MdEditor from "react-markdown-editor-lite";
+import "highlight.js/styles/github.css";
+import hljs from "highlight.js";
+import "react-markdown-editor-lite/lib/index.css";
 import { useRouter } from "next/router";
 import axios from "axios";
 
@@ -52,8 +57,21 @@ function Write() {
 	const [token, setToken] = useState(null);
 	const [openSnack, setOpenSnack] = useState(false);
 	const [message, setMessage] = useState("");
-
 	const [post, setPost] = useState({ title: "", content: "", image: null });
+	const [imgPreview, setImgPreview] = useState(null);
+
+	const mdParser = new MarkdownIt({
+		highlight: function (str, lang) {
+			if (lang && hljs.getLanguage(lang)) {
+				try {
+					return hljs.highlight(str, { lang, ignoreIllegals }).value;
+				} catch (__) {}
+			}
+			return ""; // use external default escaping
+		},
+		typographer: true,
+		linkify: true,
+	});
 
 	useEffect(() => {
 		const authToken = localStorage.getItem("accessToken");
@@ -72,9 +90,28 @@ function Write() {
 		setOpenSnack(false);
 	};
 
-	const onEditorChange = async (event, editor) => {
-		const data = editor.getData();
-		setPost({ ...post, content: data });
+	const handleEditorChange = ({ html, text }) => {
+		console.log("handleEditorChange", typeof text, text.toString());
+		setPost({ ...post, content: text.toString() });
+	};
+
+	const uploadToCloudinary = async (image) => {
+		const url = "https://api.cloudinary.com/v1_1/chukwuka/auto/upload";
+		const formData = new FormData();
+		formData.append("file", image);
+		formData.append("upload_preset", "blog_cover_images");
+
+		try {
+			const response = await axios.post(url, formData);
+			return response;
+		} catch (err) {
+			return err.message;
+		}
+	};
+
+	const handleImage = (event) => {
+		setPost({ ...post, image: event.target.files[0] });
+		setImgPreview(URL.createObjectURL(event.target.files[0]));
 	};
 
 	const handleSubmit = async () => {
@@ -85,31 +122,72 @@ function Write() {
 		}
 
 		setLoading(true);
-		const data = {
-			title: post.title,
-			content: post.content,
-		};
-		try {
-			const url = process.env.API_URL + "/post";
-			const response = await axios.post(url, JSON.stringify(data), {
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-			});
 
-			if (response.status == 201) {
-				setPost({ title: "", content: "" });
-				setMessage("Post created successfully");
-				setLoading(false);
-				setOpenSnack(true);
-				router.push("/posts");
+		try {
+			const cloudRes = await uploadToCloudinary(post.image);
+			if (cloudRes.status == 200) {
+				const data = {
+					title: post.title,
+					content: post.content,
+					image: cloudRes.data.secure_url,
+				};
+
+				const url = process.env.API_URL + "/post";
+				const response = await axios.post(url, JSON.stringify(data), {
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				if (response.status == 201) {
+					setPost({ title: "", content: "" });
+					setImgPreview(null);
+					setMessage("Post created successfully");
+					setLoading(false);
+					setOpenSnack(true);
+					router.push("/posts");
+				} else {
+					setLoading(false);
+					setMessage("Post creation failed");
+				}
 			} else {
-				setLoading(false);
-				setMessage("Post creation failed");
+				const fileReader = new FileReader();
+				fileReader.readAsDataURL(post.image);
+				fileReader.onload = async () => {
+					const data = {
+						title: post.title,
+						content: post.content,
+						image: fileReader.result,
+					};
+
+					const url = process.env.API_URL + "/post";
+					const response = await axios.post(url, JSON.stringify(data), {
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
+						},
+					});
+
+					if (response.status == 201) {
+						setPost({ title: "", content: "" });
+						setImgPreview(null);
+						setMessage("Post created successfully");
+						setLoading(false);
+						setOpenSnack(true);
+						router.push("/posts");
+					} else {
+						setLoading(false);
+						setPost({ title: "", content: "" });
+						setImgPreview(null);
+						setMessage("Post creation failed");
+					}
+				};
 			}
 		} catch (error) {
 			setLoading(false);
+			setPost({ title: "", content: "" });
+			setImgPreview(null);
 			setMessage("Sorry, an Error occurred. Please retry");
 			setOpenSnack(true);
 		}
@@ -179,140 +257,57 @@ function Write() {
 						<Typography
 							style={{ fontSize: "2em", fontWeight: "900", marginTop: "1em" }}
 							color="primary">
+							Upload Cover Image
+						</Typography>
+						{imgPreview != null && <img src={imgPreview} />}
+						<input
+							accept="image/*"
+							style={{ display: "none" }}
+							id="contained-button-file"
+							multiple
+							type="file"
+							onChange={handleImage}
+						/>
+						<div style={{ display: "flex", alignItems: "center" }}>
+							<label htmlFor="contained-button-file">
+								<Button
+									startIcon={<CloudUploadIcon />}
+									variant="contained"
+									color="primary"
+									style={{ marginTop: "0.5em" }}
+									component="span">
+									Upload
+								</Button>
+							</label>
+							{imgPreview != null && (
+								<Button
+									startIcon={<ClearIcon style={{ color: "red" }} />}
+									variant="contained"
+									style={{
+										marginTop: "0.5em",
+										marginLeft: "0.5em",
+										backgroundColor: "white",
+										border: "1px solid #32506D",
+										color: "red",
+										fontWeight: "bold",
+									}}
+									onClick={() => setImgPreview(null)}
+									component="span">
+									Clear
+								</Button>
+							)}
+						</div>
+
+						<Typography
+							style={{ fontSize: "2em", fontWeight: "900", marginTop: "1em" }}
+							color="primary">
 							Content
 						</Typography>
-						<CKEditor
-							editor={ClassicEditor}
-							data=""
-							onChange={onEditorChange}
-							config={{
-								toolbar: {
-									items: [
-										"heading",
-										"paragraph",
-										"code",
-										"|",
-										"bold",
-										"italic",
-										"underline",
-										"imageUpload",
 
-										"|",
-										"fontFamily",
-										"fontSize",
-										"fontColor",
-										"fontBackgroundColor",
-										"|",
-										"alignment",
-										"outdent",
-										"indent",
-										"bulletedList",
-										"numberedList",
-										"blockQuote",
-										"|",
-										"link",
-										"insertTable",
-										"strikethrough",
-										"codeBlock",
-										"|",
-										"undo",
-										"redo",
-										"highlight",
-									],
-									shouldNotGroupWhenFull: true,
-								},
-								heading: {
-									options: [
-										{
-											model: "paragraph",
-											view: "p",
-											title: "Paragraph",
-											class: "ck-heading_paragraph",
-										},
-										{
-											model: "heading1",
-											view: "h1",
-											title: "Heading 1",
-											class: "ck-heading_heading1",
-										},
-										{
-											model: "heading2",
-											view: "h2",
-											title: "Heading 2",
-											class: "ck-heading_heading2",
-										},
-										{
-											model: "heading3",
-											view: "h3",
-											title: "Heading 3",
-											class: "ck-heading_heading3",
-										},
-									],
-								},
-								fontSize: {
-									options: [
-										9,
-										10,
-										11,
-										12,
-										13,
-										14,
-										15,
-										16,
-										17,
-										18,
-										19,
-										20,
-										21,
-										23,
-										25,
-										27,
-										29,
-										31,
-										33,
-										35,
-									],
-								},
-								fontFamily: {
-									supportAllValues: true,
-								},
-								alignment: {
-									options: ["justify", "left", "center", "right"],
-								},
-
-								table: {
-									contentToolbar: [
-										"tableColumn",
-										"tableRow",
-										"mergeTableCells",
-									],
-								},
-								image: {
-									resizeUnit: "px",
-									toolbar: [
-										"imageStyle:alignLeft",
-										"imageStyle:full",
-										"imageStyle:alignRight",
-										"|",
-										"imageTextAlternative",
-									],
-									styles: ["full", "alignLeft", "alignRight"],
-								},
-								typing: {
-									transformations: {
-										remove: [
-											"enDash",
-											"emDash",
-											"oneHalf",
-											"oneThird",
-											"twoThirds",
-											"oneForth",
-											"threeQuarters",
-										],
-									},
-								},
-								placeholder: "What do you have to share today?",
-							}}
+						<MdEditor
+							style={{ height: "15em" }}
+							renderHTML={(text) => mdParser.render(text)}
+							onChange={handleEditorChange}
 						/>
 						<Button
 							type="submit"

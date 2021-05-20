@@ -80,7 +80,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Header(props) {
-	const { window } = props;
+	const { window, dynamicPath } = props;
 	const classes = useStyles();
 	const router = useRouter();
 	const theme = useTheme();
@@ -173,7 +173,11 @@ function Header(props) {
 							<Hidden xsDown>
 								{navLinks.map((nav, index) => (
 									<Button
-										href={nav.href}
+										href={
+											nav.href == "/login" && router.pathname == "/post/[slug]"
+												? `/login?previousPage=${dynamicPath}`
+												: nav.href
+										}
 										className={classes.navbutton}
 										key={index}
 										endIcon={nav.icon}>

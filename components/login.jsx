@@ -64,7 +64,7 @@ const Login = () => {
 	const [showPassword, setShow] = useState(false);
 
 	React.useEffect(() => {
-		// const userRef = firebase.auth().currentUser
+		router.prefetch(router.query.previousPage);
 	});
 	const handleChange = (e) => {
 		setState({ ...state, [e.target.name]: e.target.value });
@@ -86,8 +86,15 @@ const Login = () => {
 			if (response.status == 201) {
 				localStorage.setItem("accessToken", response.data.access_token);
 				localStorage.setItem("user", JSON.stringify(response.data.user));
-				setLoading(false);
-				router.push("/posts");
+
+				if (
+					router.query.previousPage != "" ||
+					router.query.previousPage != null
+				) {
+					router.push(router.query.previousPage);
+				} else {
+					router.push("/posts");
+				}
 			}
 		} catch (error) {
 			setLoading(false);

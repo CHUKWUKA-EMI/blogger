@@ -9,7 +9,7 @@ export default function Home(props) {
 				<title>Blog</title>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<Header />
+			<Header dynamicPath={props.dynamicPath} />
 			{props.children}
 		</div>
 	);
